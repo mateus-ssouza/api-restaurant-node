@@ -26,6 +26,8 @@ const Produto = db.define('Produto', {
     }
 }, { timestamps: true });
 
+Produto.belongsTo(Categoria, { foreignKey: 'categoriaId', as: 'categoria' });
+
 Produto.sync({ alter: true });
 
 module.exports = Produto;

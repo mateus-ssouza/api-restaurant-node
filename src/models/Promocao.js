@@ -23,6 +23,7 @@ const Promocao = db.define('Promocao', {
     }
 }, { timestamps: true });
 
+Produto.belongsTo(Produto, { foreignKey: 'produtoId', as: 'produto' });
 Promocao.hasMany(HorarioPromocao, { foreignKey: 'promocaoId' });
 
 Promocao.sync({ alter: true });

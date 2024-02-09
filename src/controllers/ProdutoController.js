@@ -42,4 +42,27 @@ module.exports = class PetController {
             res.status(500).json({ message: error });
         }
     }
+
+    static async getAll(req, res) {
+
+        Produto.findAll({
+            include: [
+                {
+                    model: Categoria,
+                    as: 'categoria',
+                    attributes: ['id', 'nome']
+                }
+            ],
+        })
+            .then((data) => {
+                // { plain: true }, converte o objeto result em um objeto simples
+                // removendo os metadados adicionais da consulta.
+                const produtos = data.map((result) => result.get({ plain: true }));
+
+                res.status(200).json({
+                    produtos: produtos,
+                });
+            })
+            .catch((err) => console.log(err));
+    }
 };
