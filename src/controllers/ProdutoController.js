@@ -2,7 +2,7 @@ const Produto = require('../models/Produto');
 const Categoria = require('../models/Categoria');
 const db = require('../db/conn');
 
-module.exports = class PetController {
+module.exports = class ProdutoController {
 
     static async create(req, res) {
         const nome = req.body.nome;
