@@ -90,4 +90,127 @@ module.exports = class RestauranteController {
             })
             .catch((err) => console.log(err));
     }
+
+    static async getById(req, res) {
+
+        const id = req.params.id;
+
+        const restaurante = await Restaurante.findOne(
+            {
+                where: { id: id },
+                attributes: ['id', 'nome', 'foto'],
+                include: [
+                    {
+                        model: Endereco,
+                        as: 'endereco',
+                        attributes: ['rua', 'numero', 'complemento', 'cidade', 'estado']
+                    },
+                    {
+                        model: HorarioRestaurante,
+                        as: 'horarios',
+                        attributes: ['diaDaSemana', 'abertura', 'fechamento']
+                    }
+                ]
+            }
+        );
+
+        if (!restaurante) {
+            res.status(404).json({ message: 'Restaurante não encontrado!' });
+            return;
+        }
+
+        res.status(200).json({ restaurante });
+    }
+
+    static async editRestaurant(req, res) {
+
+        const id = req.params.id;
+
+        const restaurante = await Restaurante.findOne({ where: { id: id } });
+
+        if (!restaurante) {
+            res.status(404).json({ message: 'Restaurante não encontrado!' });
+            return;
+        }
+
+        const restauranteDados = {
+            nome: req.body.nomeRestaurante,
+            foto: req.body.foto
+        };
+
+        const enderecoDados = {
+            rua: req.body.rua,
+            numero: req.body.numero,
+            complemento: req.body.complemento,
+            cidade: req.body.cidade,
+            estado: req.body.estado
+        };
+
+        const horariosDados = req.body.horarios;
+
+        const transacao = await db.transaction(); // Iniciar uma transação
+
+        try {
+
+            await Restaurante.update(restauranteDados, { where: { id: id }, transaction: transacao });
+            await Endereco.update(enderecoDados, { where: { restauranteId: id }, transaction: transacao });
+
+            // Atualizar os horários do restaurante
+            if (horariosDados && horariosDados.length > 0) {
+                await Promise.all(horariosDados.map(async (horario) => {
+                    await HorarioRestaurante.update({
+                        diaDaSemana: horario.diaDaSemana,
+                        abertura: horario.abertura,
+                        fechamento: horario.fechamento
+                    }, {
+                        where: { restauranteId: id, diaDaSemana: horario.diaDaSemana },
+                        transaction: transacao
+                    });
+                }));
+            }
+
+            // Commit a transação
+            await transacao.commit();
+
+            res.status(200).json({
+                message: 'Restaurante atualizado com sucesso!'
+            });
+        } catch (error) {
+            // Rollback em caso de erro
+            await transacao.rollback();
+            res.status(500).json({ message: error });
+        }
+    }
+
+    static async removeRestaurant(req, res) {
+
+        const id = req.params.id;
+
+        const restaurante = await Restaurante.findOne({ where: { id: id } });
+
+        if (!restaurante) {
+            res.status(404).json({ message: 'Restaurante não encontrado!' });
+            return;
+        }
+
+        const transacao = await db.transaction(); // Iniciar uma transação
+
+        try {
+
+            await Endereco.destroy({ where: { restauranteId: id }, transaction: transacao });
+            await HorarioRestaurante.destroy({ where: { restauranteId: id }, transaction: transacao });
+            await Restaurante.destroy({ where: { id: id }, transaction: transacao });
+
+            // Commit a transação
+            await transacao.commit();
+
+            res.status(200).json({
+                message: 'Restaurante removido com sucesso!'
+            });
+        } catch (error) {
+            // Rollback em caso de erro
+            await transacao.rollback();
+            res.status(500).json({ message: error });
+        }
+    }
 };
