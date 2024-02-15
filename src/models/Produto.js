@@ -2,6 +2,7 @@ const { DataTypes } = require('sequelize');
 
 const db = require('../db/conn');
 const Categoria = require('./Categoria');
+const Restaurante = require('./Restaurante');
 
 const Produto = db.define('Produto', {
     nome: {
@@ -15,18 +16,11 @@ const Produto = db.define('Produto', {
     foto: {
         type: DataTypes.STRING,
         allowNull: false
-    },
-    categoriaId: {
-        type: DataTypes.INTEGER, 
-        allowNull: false,
-        references: {
-            model: Categoria,
-            key: 'id'
-        }
     }
 }, { timestamps: true });
 
 Produto.belongsTo(Categoria, { foreignKey: 'categoriaId', as: 'categoria' });
+Restaurante.hasMany(Produto, { as: 'produtos' , foreignKey: 'restauranteId' });
 
 Produto.sync({ alter: true });
 

@@ -2,10 +2,12 @@ const Restaurante = require('../models/Restaurante');
 const Endereco = require('../models/Endereco');
 const HorarioRestaurante = require('../models/HorarioRestaurante');
 const db = require('../db/conn');
+const Categoria = require('../models/Categoria');
+const Produto = require('../models/Produto');
 
 module.exports = class RestauranteController {
 
-    static async create(req, res) {
+    static async createRestaurant(req, res) {
 
         const {
             nomeRestaurante,
@@ -63,7 +65,7 @@ module.exports = class RestauranteController {
         }
     }
 
-    static async getAll(req, res) {
+    static async getAllRestaurant(req, res) {
 
         Restaurante.findAll({
             include: [
@@ -91,7 +93,7 @@ module.exports = class RestauranteController {
             .catch((err) => console.log(err));
     }
 
-    static async getById(req, res) {
+    static async getRestaurantById(req, res) {
 
         const id = req.params.id;
 
@@ -206,6 +208,187 @@ module.exports = class RestauranteController {
 
             res.status(200).json({
                 message: 'Restaurante removido com sucesso!'
+            });
+        } catch (error) {
+            // Rollback em caso de erro
+            await transacao.rollback();
+            res.status(500).json({ message: error });
+        }
+    }
+
+    static async createProduct(req, res) {
+
+        const id = req.params.id;
+
+        const restaurante = await Restaurante.findOne({ where: { id: id } });
+
+        if (!restaurante) {
+            res.status(404).json({ message: 'Restaurante não encontrado!' });
+            return;
+        }
+
+        const {
+            nome,
+            preco,
+            foto,
+            nomeCategoria
+        } = req.body;
+        
+        const transacao = await db.transaction(); // Iniciar uma transação
+
+        try {
+            // Verifique se a categoria já existe
+            let categoria = await Categoria.findOne({ where: { nome: nomeCategoria }, transaction: transacao });
+
+            // Se não existir, crie uma nova categoria
+            if (!categoria) {
+                categoria = await Categoria.create({ nome: nomeCategoria }, { transaction: transacao });
+            }
+
+            // Crie o produto associado à categoria
+            const novoProduto = await Produto.create({
+                nome: nome,
+                preco: preco,
+                foto: foto,
+                categoriaId: categoria.id,
+                restauranteId: id
+            }, { transaction: transacao });
+
+            // Commit a transação
+            await transacao.commit();
+
+            res.status(201).json({
+                message: 'Produto cadastrado com sucesso!',
+                Produto: novoProduto,
+            });
+        } catch (error) {
+            // Rollback em caso de erro
+            await transacao.rollback();
+            res.status(500).json({ message: error });
+        }
+    }
+
+    static async getAllProductsOfRestaurant(req, res) {
+
+        const id = req.params.id;
+
+        const restaurante = await Restaurante.findOne({ where: { id: id } });
+
+        if (!restaurante) {
+            res.status(404).json({ message: 'Restaurante não encontrado!' });
+            return;
+        }
+
+        Produto.findAll({
+            attributes: ['nome', 'preco', 'foto'],
+            include: [
+                {
+                    model: Categoria,
+                    as: 'categoria',
+                    attributes: ['nome']
+                }
+            ],
+        })
+            .then((data) => {
+                // { plain: true }, converte o objeto result em um objeto simples
+                // removendo os metadados adicionais da consulta.
+                const produtos = data.map((result) => result.get({ plain: true }));
+
+                res.status(200).json({
+                    produtos: produtos,
+                });
+            })
+            .catch((err) => console.log(err));
+    }
+
+    static async editProduct(req, res) {
+
+        const { id, idProduto } = req.params;
+
+        const restaurante = await Restaurante.findOne({ where: { id: id } });
+
+        if (!restaurante) {
+            res.status(404).json({ message: 'Restaurante não encontrado!' });
+            return;
+        }
+
+        const produto = await Produto.findOne({ where: { id: idProduto } });
+
+        if (!produto) {
+            res.status(404).json({ message: 'Produto não encontrado!' });
+            return;
+        }
+
+        const {
+            nome,
+            preco,
+            foto,
+            nomeCategoria
+        } = req.body;
+
+        const transacao = await db.transaction(); // Iniciar uma transação
+
+        try {
+
+            // Verifique se a categoria já existe
+            let categoria = await Categoria.findOne({ where: { nome: nomeCategoria }, transaction: transacao });
+
+            // Se não existir, crie uma nova categoria
+            if (!categoria) {
+                categoria = await Categoria.create({ nome: nomeCategoria }, { transaction: transacao });
+            }
+
+            const produtoDados = {
+                nome: nome,
+                preco: preco,
+                foto: foto,
+                categoriaId: categoria.id
+            };
+
+            await Produto.update(produtoDados, { where: { id: idProduto }, transaction: transacao });
+
+            // Commit a transação
+            await transacao.commit();
+
+            res.status(200).json({
+                message: 'Produto atualizado com sucesso!'
+            });
+        } catch (error) {
+            // Rollback em caso de erro
+            await transacao.rollback();
+            res.status(500).json({ message: error });
+        }
+    }
+
+    static async removeProduct(req, res) {
+
+        const { id, idProduto } = req.params;
+
+        const restaurante = await Restaurante.findOne({ where: { id: id } });
+
+        if (!restaurante) {
+            res.status(404).json({ message: 'Restaurante não encontrado!' });
+            return;
+        }
+
+        const produto = await Produto.findOne({ where: { id: idProduto } });
+
+        if (!produto) {
+            res.status(404).json({ message: 'Produto não encontrado!' });
+            return;
+        }
+
+        const transacao = await db.transaction(); // Iniciar uma transação
+
+        try {
+
+            await Produto.destroy({ where: { id: idProduto , restauranteId: id }, transaction: transacao });
+            
+            // Commit a transação
+            await transacao.commit();
+
+            res.status(200).json({
+                message: 'Produto removido com sucesso!'
             });
         } catch (error) {
             // Rollback em caso de erro

@@ -10,10 +10,8 @@ app.use(express.json());
 app.use(express.static('public'));
 
 // Rotas
-const ProdutoRoutes = require('./routes/ProdutoRoutes');
 const RestauranteRoutes = require('./routes/RestauranteRoutes');
 
-app.use('/produtos', ProdutoRoutes);
 app.use('/restaurantes', RestauranteRoutes);
 
 app.listen(process.env.PORT, () => { 

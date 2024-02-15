@@ -12,14 +12,6 @@ const Promocao = db.define('Promocao', {
     precoPromocao: {
         type: DataTypes.FLOAT,
         allowNull: false
-    },
-    produtoId: {
-        type: DataTypes.INTEGER, 
-        allowNull: false,
-        references: {
-            model: Produto,
-            key: 'id'
-        }
     }
 }, { timestamps: true });
 
