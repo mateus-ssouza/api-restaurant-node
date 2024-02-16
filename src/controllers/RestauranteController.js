@@ -13,7 +13,6 @@ module.exports = class RestauranteController {
 
         const {
             nomeRestaurante,
-            foto,
             rua,
             numero,
             complemento,
@@ -21,6 +20,12 @@ module.exports = class RestauranteController {
             estado,
             horarios
         } = req.body;
+
+        let foto = '';
+
+        if (req.file) {
+            foto = req.file.filename;
+        }
 
         const transacao = await db.transaction(); // Iniciar uma transação
 
@@ -137,9 +142,15 @@ module.exports = class RestauranteController {
             return;
         }
 
+        let foto = '';
+
+        if (req.file) {
+            foto = req.file.filename;
+        }
+
         const restauranteDados = {
             nome: req.body.nomeRestaurante,
-            foto: req.body.foto
+            foto: foto
         };
 
         const enderecoDados = {
@@ -203,6 +214,7 @@ module.exports = class RestauranteController {
 
             await Endereco.destroy({ where: { restauranteId: id }, transaction: transacao });
             await HorarioRestaurante.destroy({ where: { restauranteId: id }, transaction: transacao });
+            await Produto.destroy({ where: { restauranteId: id }, transaction: transacao });
             await Restaurante.destroy({ where: { id: id }, transaction: transacao });
 
             // Commit a transação
@@ -232,10 +244,15 @@ module.exports = class RestauranteController {
         const {
             nome,
             preco,
-            foto,
             nomeCategoria
         } = req.body;
-        
+
+        let foto = '';
+
+        if (req.file) {
+            foto = req.file.filename;
+        }
+
         const transacao = await db.transaction(); // Iniciar uma transação
 
         try {
@@ -261,7 +278,7 @@ module.exports = class RestauranteController {
 
             res.status(201).json({
                 message: 'Produto cadastrado com sucesso!',
-                Produto: novoProduto,
+                Produto: novoProduto
             });
         } catch (error) {
             // Rollback em caso de erro
@@ -324,9 +341,14 @@ module.exports = class RestauranteController {
         const {
             nome,
             preco,
-            foto,
             nomeCategoria
         } = req.body;
+
+        let foto = '';
+
+        if (req.file) {
+            foto = req.file.filename;
+        }
 
         const transacao = await db.transaction(); // Iniciar uma transação
 
@@ -384,8 +406,8 @@ module.exports = class RestauranteController {
 
         try {
 
-            await Produto.destroy({ where: { id: idProduto , restauranteId: id }, transaction: transacao });
-            
+            await Produto.destroy({ where: { id: idProduto, restauranteId: id }, transaction: transacao });
+
             // Commit a transação
             await transacao.commit();
 
@@ -422,7 +444,7 @@ module.exports = class RestauranteController {
             precoPromocao,
             horarios
         } = req.body;
-        
+
         const transacao = await db.transaction(); // Iniciar uma transação
 
         try {

@@ -2,6 +2,10 @@
 # ENV
 .env
 
+# IMAGES
+/src/public/images/**/*.png
+/src/public/images/**/*.jpg
+
 # Logs
 logs
 *.log
