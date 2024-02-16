@@ -22,6 +22,6 @@ const Produto = db.define('Produto', {
 Produto.belongsTo(Categoria, { foreignKey: 'categoriaId', as: 'categoria' });
 Restaurante.hasMany(Produto, { as: 'produtos' , foreignKey: 'restauranteId' });
 
-Produto.sync({ alter: true });
+Produto.sync({ alter: false });
 
 module.exports = Produto;

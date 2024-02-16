@@ -4,6 +4,8 @@ const HorarioRestaurante = require('../models/HorarioRestaurante');
 const db = require('../db/conn');
 const Categoria = require('../models/Categoria');
 const Produto = require('../models/Produto');
+const Promocao = require('../models/Promocao');
+const HorarioPromocao = require('../models/HorarioPromocao');
 
 module.exports = class RestauranteController {
 
@@ -389,6 +391,110 @@ module.exports = class RestauranteController {
 
             res.status(200).json({
                 message: 'Produto removido com sucesso!'
+            });
+        } catch (error) {
+            // Rollback em caso de erro
+            await transacao.rollback();
+            res.status(500).json({ message: error });
+        }
+    }
+
+    static async addPromotion(req, res) {
+
+        const { id, idProduto } = req.params;
+
+        const restaurante = await Restaurante.findOne({ where: { id: id } });
+
+        if (!restaurante) {
+            res.status(404).json({ message: 'Restaurante não encontrado!' });
+            return;
+        }
+
+        const produto = await Produto.findOne({ where: { id: idProduto } });
+
+        if (!produto) {
+            res.status(404).json({ message: 'Produto não encontrado!' });
+            return;
+        }
+
+        const {
+            descricao,
+            precoPromocao,
+            horarios
+        } = req.body;
+        
+        const transacao = await db.transaction(); // Iniciar uma transação
+
+        try {
+
+            const promocao = await Promocao.create({
+                descricao: descricao,
+                precoPromocao: precoPromocao,
+                produtoId: idProduto
+            }, { transaction: transacao });
+
+            // Criar os horários do restaurante
+            if (horarios && horarios.length > 0) {
+                await Promise.all(horarios.map(async (horario) => {
+                    await HorarioPromocao.create({
+                        diaDaSemana: horario.diaDaSemana,
+                        inicioDaPromocao: horario.inicioDaPromocao,
+                        fimDaPromocao: horario.fimDaPromocao,
+                        promocaoId: promocao.id
+                    }, { transaction: transacao });
+                }));
+            }
+
+            // Commit a transação
+            await transacao.commit();
+
+            res.status(201).json({
+                message: 'Promoção atribuída ao produto com sucesso!',
+            });
+        } catch (error) {
+            // Rollback em caso de erro
+            await transacao.rollback();
+            res.status(500).json({ message: error });
+        }
+    }
+
+    static async removePromotion(req, res) {
+
+        const { id, idProduto } = req.params;
+
+        const restaurante = await Restaurante.findOne({ where: { id: id } });
+
+        if (!restaurante) {
+            res.status(404).json({ message: 'Restaurante não encontrado!' });
+            return;
+        }
+
+        const produto = await Produto.findOne({ where: { id: idProduto } });
+
+        if (!produto) {
+            res.status(404).json({ message: 'Produto não encontrado!' });
+            return;
+        }
+
+        const promocao = await Promocao.findOne({ where: { produtoId: idProduto } });
+
+        if (!promocao) {
+            res.status(404).json({ message: 'Este produto não possui promoção!' });
+            return;
+        }
+
+        const transacao = await db.transaction(); // Iniciar uma transação
+
+        try {
+
+            await HorarioPromocao.destroy({ where: { promocaoId: promocao.id }, transaction: transacao });
+            await Promocao.destroy({ where: { id: promocao.id }, transaction: transacao });
+
+            // Commit a transação
+            await transacao.commit();
+
+            res.status(200).json({
+                message: 'Promoção removida com sucesso!'
             });
         } catch (error) {
             // Rollback em caso de erro
