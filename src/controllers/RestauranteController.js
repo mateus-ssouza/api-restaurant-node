@@ -317,7 +317,7 @@ module.exports = class RestauranteController {
                     attributes: ['nome']
                 }
             ],
-            where: { restauranteId: id } 
+            where: { restauranteId: id }
         })
             .then((data) => {
                 // { plain: true }, converte o objeto result em um objeto simples
@@ -482,6 +482,21 @@ module.exports = class RestauranteController {
         const transacao = await db.transaction(); // Iniciar uma transação
 
         try {
+            const restauranteHorarios = await HorarioRestaurante.findAll({ where: { restauranteId: id } });
+
+            for (const horario of horarios) {
+                const horarioRestaurante = restauranteHorarios.find(
+                    h => h.diaDaSemana === horario.diaDaSemana &&
+                        new Date('1970-01-01T' + h.abertura) <= new Date('1970-01-01T' + horario.inicioDaPromocao) &&
+                        new Date('1970-01-01T' + h.fechamento) >= new Date('1970-01-01T' + horario.fimDaPromocao)
+                );
+
+                if (!horarioRestaurante) {
+                    await transacao.rollback();
+                    res.status(400).json({ message: 'O horário da promoção não está dentro do horário de funcionamento do restaurante' });
+                    return;
+                }
+            }
 
             const promocao = await Promocao.create({
                 descricao: descricao,
