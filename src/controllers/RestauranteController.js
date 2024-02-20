@@ -219,7 +219,7 @@ module.exports = class RestauranteController {
 
                 const promocao = await Promocao.findOne({ where: { produtoId: produto.id } });
 
-                if (promocao != null) {
+                if (promocao) {
                     await HorarioPromocao.destroy({ where: { promocaoId: promocao.id }, transaction: transacao });
                     await Promocao.destroy({ where: { produtoId: produto.id }, transaction: transacao });
                 }
@@ -349,6 +349,11 @@ module.exports = class RestauranteController {
             return;
         }
 
+        if (produto.restauranteId != id) {
+            res.status(400).json({ message: 'Este produto não pertence a esse restaurante!' });
+            return;
+        }
+
         const {
             nome,
             preco,
@@ -418,7 +423,7 @@ module.exports = class RestauranteController {
         try {
             const promocao = await Promocao.findOne({ where: { produtoId: idProduto } });
 
-            if (promocao != null) {
+            if (promocao) {
                 await HorarioPromocao.destroy({ where: { promocaoId: promocao.id }, transaction: transacao });
                 await Promocao.destroy({ where: { produtoId: idProduto }, transaction: transacao });
             }
@@ -453,6 +458,18 @@ module.exports = class RestauranteController {
 
         if (!produto) {
             res.status(404).json({ message: 'Produto não encontrado!' });
+            return;
+        }
+
+        if (produto.restauranteId != id) {
+            res.status(400).json({ message: 'Este produto não pertence a esse restaurante!' });
+            return;
+        }
+
+        const promocao = await Promocao.findOne({ where: { produtoId: idProduto } });
+
+        if (promocao) {
+            res.status(400).json({ message: 'Produto já possui uma promoção!' });
             return;
         }
 
@@ -512,6 +529,11 @@ module.exports = class RestauranteController {
 
         if (!produto) {
             res.status(404).json({ message: 'Produto não encontrado!' });
+            return;
+        }
+
+        if (produto.restauranteId != id) {
+            res.status(400).json({ message: 'Este produto não pertence a esse restaurante!' });
             return;
         }
 
