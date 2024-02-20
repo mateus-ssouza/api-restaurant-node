@@ -214,6 +214,16 @@ module.exports = class RestauranteController {
 
             await Endereco.destroy({ where: { restauranteId: id }, transaction: transacao });
             await HorarioRestaurante.destroy({ where: { restauranteId: id }, transaction: transacao });
+            const produtos = await Produto.findAll({ where: { restauranteId: id }, transaction: transacao });
+            for (const produto of produtos) {
+
+                const promocao = await Promocao.findOne({ where: { produtoId: produto.id } });
+
+                if (promocao != null) {
+                    await HorarioPromocao.destroy({ where: { promocaoId: promocao.id }, transaction: transacao });
+                    await Promocao.destroy({ where: { produtoId: produto.id }, transaction: transacao });
+                }
+            }
             await Produto.destroy({ where: { restauranteId: id }, transaction: transacao });
             await Restaurante.destroy({ where: { id: id }, transaction: transacao });
 
@@ -307,6 +317,7 @@ module.exports = class RestauranteController {
                     attributes: ['nome']
                 }
             ],
+            where: { restauranteId: id } 
         })
             .then((data) => {
                 // { plain: true }, converte o objeto result em um objeto simples
@@ -405,6 +416,12 @@ module.exports = class RestauranteController {
         const transacao = await db.transaction(); // Iniciar uma transação
 
         try {
+            const promocao = await Promocao.findOne({ where: { produtoId: idProduto } });
+
+            if (promocao != null) {
+                await HorarioPromocao.destroy({ where: { promocaoId: promocao.id }, transaction: transacao });
+                await Promocao.destroy({ where: { produtoId: idProduto }, transaction: transacao });
+            }
 
             await Produto.destroy({ where: { id: idProduto, restauranteId: id }, transaction: transacao });
 
