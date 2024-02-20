@@ -169,18 +169,29 @@ module.exports = class RestauranteController {
 
             await Restaurante.update(restauranteDados, { where: { id: id }, transaction: transacao });
             await Endereco.update(enderecoDados, { where: { restauranteId: id }, transaction: transacao });
+            await HorarioRestaurante.destroy({ where: { restauranteId: id }, transaction: transacao });
+            // Remover as promoções e seus horários dos produtos ativos
+            const produtos = await Produto.findAll({ where: { restauranteId: id }, transaction: transacao });
+
+            for (const produto of produtos) {
+                
+                const promocao = await Promocao.findOne({ where: { produtoId: produto.id }, transaction: transacao });
+                
+                if (promocao) {
+                    await HorarioPromocao.destroy({ where: { promocaoId: promocao.id }, transaction: transacao });
+                    await Promocao.destroy({ where: { id: promocao.id }, transaction: transacao });
+                }
+            }
 
             // Atualizar os horários do restaurante
             if (horariosDados && horariosDados.length > 0) {
                 await Promise.all(horariosDados.map(async (horario) => {
-                    await HorarioRestaurante.update({
+                    await HorarioRestaurante.create({
                         diaDaSemana: horario.diaDaSemana,
                         abertura: horario.abertura,
-                        fechamento: horario.fechamento
-                    }, {
-                        where: { restauranteId: id, diaDaSemana: horario.diaDaSemana },
-                        transaction: transacao
-                    });
+                        fechamento: horario.fechamento,
+                        restauranteId: restaurante.id
+                    }, { transaction: transacao });
                 }));
             }
 
