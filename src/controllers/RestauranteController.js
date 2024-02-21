@@ -7,10 +7,17 @@ const Produto = require('../models/Produto');
 const Promocao = require('../models/Promocao');
 const HorarioPromocao = require('../models/HorarioPromocao');
 const CustomError = require('../handleErrors/CustomError');
+const { validationResult } = require('express-validator');
 
 module.exports = class RestauranteController {
 
     static async createRestaurant(req, res) {
+
+        const erros = validationResult(req);
+
+        if (!erros.isEmpty()) {
+            return res.status(400).json({ errors: erros.array() });
+        }
 
         const {
             nomeRestaurante,
@@ -28,6 +35,10 @@ module.exports = class RestauranteController {
             foto = req.file.filename;
         }
 
+        if (foto == '') {
+            throw new CustomError('O campo foto é obrigatório', 400);
+        }
+
         const transacao = await db.transaction(); // Iniciar uma transação
 
         try {
@@ -37,7 +48,7 @@ module.exports = class RestauranteController {
                 foto: foto
             }, { transaction: transacao });
 
-            const endereco = await Endereco.create({
+            await Endereco.create({
                 rua: rua,
                 numero: numero,
                 complemento: complemento,
@@ -62,9 +73,7 @@ module.exports = class RestauranteController {
             await transacao.commit();
 
             res.status(201).json({
-                message: 'Restaurante cadastrado com sucesso!',
-                Restaurante: restaurante,
-                Endereco: endereco
+                message: 'Restaurante cadastrado com sucesso!'
             });
         } catch (error) {
             // Rollback em caso de erro
@@ -133,6 +142,12 @@ module.exports = class RestauranteController {
 
     static async editRestaurant(req, res) {
 
+        const erros = validationResult(req);
+
+        if (!erros.isEmpty()) {
+            return res.status(400).json({ errors: erros.array() });
+        }
+
         const id = req.params.id;
 
         const restaurante = await Restaurante.findOne({ where: { id: id } });
@@ -145,6 +160,10 @@ module.exports = class RestauranteController {
 
         if (req.file) {
             foto = req.file.filename;
+        }
+
+        if (foto == '') {
+            throw new CustomError('O campo foto é obrigatório', 400);
         }
 
         const restauranteDados = {
@@ -251,6 +270,12 @@ module.exports = class RestauranteController {
 
     static async createProduct(req, res) {
 
+        const erros = validationResult(req);
+
+        if (!erros.isEmpty()) {
+            return res.status(400).json({ errors: erros.array() });
+        }
+
         const id = req.params.id;
 
         const restaurante = await Restaurante.findOne({ where: { id: id } });
@@ -271,6 +296,10 @@ module.exports = class RestauranteController {
             foto = req.file.filename;
         }
 
+        if (foto == '') {
+            throw new CustomError('O campo foto é obrigatório', 400);
+        }
+
         const transacao = await db.transaction(); // Iniciar uma transação
 
         try {
@@ -283,7 +312,7 @@ module.exports = class RestauranteController {
             }
 
             // Crie o produto associado à categoria
-            const novoProduto = await Produto.create({
+            await Produto.create({
                 nome: nome,
                 preco: preco,
                 foto: foto,
@@ -295,8 +324,7 @@ module.exports = class RestauranteController {
             await transacao.commit();
 
             res.status(201).json({
-                message: 'Produto cadastrado com sucesso!',
-                Produto: novoProduto
+                message: 'Produto cadastrado com sucesso!'
             });
         } catch (error) {
             // Rollback em caso de erro
@@ -340,6 +368,12 @@ module.exports = class RestauranteController {
 
     static async editProduct(req, res) {
 
+        const erros = validationResult(req);
+
+        if (!erros.isEmpty()) {
+            return res.status(400).json({ errors: erros.array() });
+        }
+
         const { id, idProduto } = req.params;
 
         const restaurante = await Restaurante.findOne({ where: { id: id } });
@@ -368,6 +402,10 @@ module.exports = class RestauranteController {
 
         if (req.file) {
             foto = req.file.filename;
+        }
+
+        if (foto == '') {
+            throw new CustomError('O campo foto é obrigatório', 400);
         }
 
         const transacao = await db.transaction(); // Iniciar uma transação
@@ -446,6 +484,12 @@ module.exports = class RestauranteController {
     }
 
     static async addPromotion(req, res) {
+
+        const erros = validationResult(req);
+
+        if (!erros.isEmpty()) {
+            return res.status(400).json({ errors: erros.array() });
+        }
 
         const { id, idProduto } = req.params;
 

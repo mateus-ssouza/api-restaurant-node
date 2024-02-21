@@ -1,5 +1,6 @@
 const multer = require('multer');
 const path = require('path');
+const CustomError = require('../handleErrors/CustomError');
 
 // Destination to store image
 const imageStorage = multer.diskStorage({
@@ -24,7 +25,7 @@ const imageUpload = multer({
     fileFilter(req, file, cb) {
         if (!file.originalname.match(/\.(png|jpg)$/)) {
             // upload only png and jpg format
-            return cb(new Error('Por favor, envie apenas png ou jpg!'));
+            return cb(new CustomError('A imagem enviada deve ser png ou jpeg.', 400));
         }
         cb(undefined, true);
     },

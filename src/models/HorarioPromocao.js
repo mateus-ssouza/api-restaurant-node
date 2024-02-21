@@ -16,14 +16,6 @@ const HorarioPromocao = db.define('HorarioPromocao', {
         type: DataTypes.TIME,
         allowNull: false
     },
-    /*promocaoId: {
-        type: DataTypes.INTEGER, 
-        allowNull: false,
-        references: {
-            model: Promocao,
-            key: 'id'
-        }
-    }*/
 }, { timestamps: true });
 
 Promocao.hasMany(HorarioPromocao, { as: 'horarios' , foreignKey: 'promocaoId' });
