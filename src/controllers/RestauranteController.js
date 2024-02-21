@@ -6,6 +6,7 @@ const Categoria = require('../models/Categoria');
 const Produto = require('../models/Produto');
 const Promocao = require('../models/Promocao');
 const HorarioPromocao = require('../models/HorarioPromocao');
+const CustomError = require('../handleErrors/CustomError');
 
 module.exports = class RestauranteController {
 
@@ -124,8 +125,7 @@ module.exports = class RestauranteController {
         );
 
         if (!restaurante) {
-            res.status(404).json({ message: 'Restaurante não encontrado!' });
-            return;
+            throw new CustomError('Restaurante não encontrado!', 404);
         }
 
         res.status(200).json({ restaurante });
@@ -138,8 +138,7 @@ module.exports = class RestauranteController {
         const restaurante = await Restaurante.findOne({ where: { id: id } });
 
         if (!restaurante) {
-            res.status(404).json({ message: 'Restaurante não encontrado!' });
-            return;
+            throw new CustomError('Restaurante não encontrado!', 404);
         }
 
         let foto = '';
@@ -174,9 +173,9 @@ module.exports = class RestauranteController {
             const produtos = await Produto.findAll({ where: { restauranteId: id }, transaction: transacao });
 
             for (const produto of produtos) {
-                
+
                 const promocao = await Promocao.findOne({ where: { produtoId: produto.id }, transaction: transacao });
-                
+
                 if (promocao) {
                     await HorarioPromocao.destroy({ where: { promocaoId: promocao.id }, transaction: transacao });
                     await Promocao.destroy({ where: { id: promocao.id }, transaction: transacao });
@@ -215,8 +214,7 @@ module.exports = class RestauranteController {
         const restaurante = await Restaurante.findOne({ where: { id: id } });
 
         if (!restaurante) {
-            res.status(404).json({ message: 'Restaurante não encontrado!' });
-            return;
+            throw new CustomError('Restaurante não encontrado!', 404);
         }
 
         const transacao = await db.transaction(); // Iniciar uma transação
@@ -258,8 +256,7 @@ module.exports = class RestauranteController {
         const restaurante = await Restaurante.findOne({ where: { id: id } });
 
         if (!restaurante) {
-            res.status(404).json({ message: 'Restaurante não encontrado!' });
-            return;
+            throw new CustomError('Restaurante não encontrado!', 404);
         }
 
         const {
@@ -315,8 +312,7 @@ module.exports = class RestauranteController {
         const restaurante = await Restaurante.findOne({ where: { id: id } });
 
         if (!restaurante) {
-            res.status(404).json({ message: 'Restaurante não encontrado!' });
-            return;
+            throw new CustomError('Restaurante não encontrado!', 404);
         }
 
         Produto.findAll({
@@ -349,20 +345,17 @@ module.exports = class RestauranteController {
         const restaurante = await Restaurante.findOne({ where: { id: id } });
 
         if (!restaurante) {
-            res.status(404).json({ message: 'Restaurante não encontrado!' });
-            return;
+            throw new CustomError('Restaurante não encontrado!', 404);
         }
 
         const produto = await Produto.findOne({ where: { id: idProduto } });
 
         if (!produto) {
-            res.status(404).json({ message: 'Produto não encontrado!' });
-            return;
+            throw new CustomError('Produto não encontrado!', 404);
         }
 
         if (produto.restauranteId != id) {
-            res.status(400).json({ message: 'Este produto não pertence a esse restaurante!' });
-            return;
+            throw new CustomError('Este produto não pertence a esse restaurante!', 400);
         }
 
         const {
@@ -418,15 +411,13 @@ module.exports = class RestauranteController {
         const restaurante = await Restaurante.findOne({ where: { id: id } });
 
         if (!restaurante) {
-            res.status(404).json({ message: 'Restaurante não encontrado!' });
-            return;
+            throw new CustomError('Restaurante não encontrado!', 404);
         }
 
         const produto = await Produto.findOne({ where: { id: idProduto } });
 
         if (!produto) {
-            res.status(404).json({ message: 'Produto não encontrado!' });
-            return;
+            throw new CustomError('Produto não encontrado!', 404);
         }
 
         const transacao = await db.transaction(); // Iniciar uma transação
@@ -461,27 +452,23 @@ module.exports = class RestauranteController {
         const restaurante = await Restaurante.findOne({ where: { id: id } });
 
         if (!restaurante) {
-            res.status(404).json({ message: 'Restaurante não encontrado!' });
-            return;
+            throw new CustomError('Restaurante não encontrado!', 404);
         }
 
         const produto = await Produto.findOne({ where: { id: idProduto } });
 
         if (!produto) {
-            res.status(404).json({ message: 'Produto não encontrado!' });
-            return;
+            throw new CustomError('Produto não encontrado!', 404);
         }
 
         if (produto.restauranteId != id) {
-            res.status(400).json({ message: 'Este produto não pertence a esse restaurante!' });
-            return;
+            throw new CustomError('Este produto não pertence a esse restaurante!', 400);
         }
 
         const promocao = await Promocao.findOne({ where: { produtoId: idProduto } });
 
         if (promocao) {
-            res.status(400).json({ message: 'Produto já possui uma promoção!' });
-            return;
+            throw new CustomError('Produto já possui uma promoção!', 400);
         }
 
         const {
@@ -547,27 +534,23 @@ module.exports = class RestauranteController {
         const restaurante = await Restaurante.findOne({ where: { id: id } });
 
         if (!restaurante) {
-            res.status(404).json({ message: 'Restaurante não encontrado!' });
-            return;
+            throw new CustomError('Restaurante não encontrado!', 404);
         }
 
         const produto = await Produto.findOne({ where: { id: idProduto } });
 
         if (!produto) {
-            res.status(404).json({ message: 'Produto não encontrado!' });
-            return;
+            throw new CustomError('Produto não encontrado!', 404);
         }
 
         if (produto.restauranteId != id) {
-            res.status(400).json({ message: 'Este produto não pertence a esse restaurante!' });
-            return;
+            throw new CustomError('Este produto não pertence a esse restaurante!', 400);
         }
 
         const promocao = await Promocao.findOne({ where: { produtoId: idProduto } });
 
         if (!promocao) {
-            res.status(404).json({ message: 'Este produto não possui promoção!' });
-            return;
+            throw new CustomError('Este produto não possui promoção!', 404);
         }
 
         const transacao = await db.transaction(); // Iniciar uma transação

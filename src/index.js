@@ -11,8 +11,11 @@ app.use(express.static('public'));
 
 // Rotas
 const RestauranteRoutes = require('./routes/RestauranteRoutes');
-
 app.use('/restaurantes', RestauranteRoutes);
+
+// Tratamento de erros
+const errorHandler = require('./helpers/handlerError');
+app.use(errorHandler);
 
 app.listen(process.env.PORT, () => { 
     console.log('Servidor executando!');
