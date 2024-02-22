@@ -11,6 +11,7 @@ const { createRestaurantValidation, editRestaurantValidation } = require('../val
 const { createProductValidation, editProductValidation } = require('../validators/produtoValidators');
 const { createPromotionValidation } = require('../validators/promocaoValidators');
 
+// Rotas
 router.post('/', 
     imageUpload.single('foto'),
     createRestaurantValidation, 

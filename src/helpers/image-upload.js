@@ -2,7 +2,7 @@ const multer = require('multer');
 const path = require('path');
 const CustomError = require('../handleErrors/CustomError');
 
-// Destination to store image
+// Função para determinar o destino do upload da imagem
 const imageStorage = multer.diskStorage({
     destination: function (req, file, cb) {
         let folder = '';
@@ -20,6 +20,7 @@ const imageStorage = multer.diskStorage({
     },
 });
 
+// Função para realizar upload da imagem
 const imageUpload = multer({
     storage: imageStorage,
     fileFilter(req, file, cb) {

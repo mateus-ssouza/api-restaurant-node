@@ -15,6 +15,7 @@ module.exports = class RestauranteController {
 
         const erros = validationResult(req);
 
+        // Verificar se existe erro na validação do elementos vindo do body
         if (!erros.isEmpty()) {
             return res.status(400).json({ errors: erros.array() });
         }
@@ -31,15 +32,18 @@ module.exports = class RestauranteController {
 
         let foto = '';
 
+        // Verificar se veio file (imagem) na requisição
         if (req.file) {
             foto = req.file.filename;
         }
 
+        // Tratar se não houve upload de uma imagem na requisição
         if (foto == '') {
             throw new CustomError('O campo foto é obrigatório', 400);
         }
 
-        const transacao = await db.transaction(); // Iniciar uma transação
+        // Iniciar uma transação
+        const transacao = await db.transaction();
 
         try {
 
@@ -133,6 +137,7 @@ module.exports = class RestauranteController {
             }
         );
 
+        // Tratar se não encontrou um restaurante
         if (!restaurante) {
             throw new CustomError('Restaurante não encontrado!', 404);
         }
@@ -144,6 +149,7 @@ module.exports = class RestauranteController {
 
         const erros = validationResult(req);
 
+        // Verificar se existe erro na validação do elementos vindo do body
         if (!erros.isEmpty()) {
             return res.status(400).json({ errors: erros.array() });
         }
@@ -152,16 +158,19 @@ module.exports = class RestauranteController {
 
         const restaurante = await Restaurante.findOne({ where: { id: id } });
 
+        // Tratar se não encontrou um restaurante
         if (!restaurante) {
             throw new CustomError('Restaurante não encontrado!', 404);
         }
 
         let foto = '';
 
+        // Verificar se veio file (imagem) na requisição
         if (req.file) {
             foto = req.file.filename;
         }
 
+        // Tratar se não houve upload de uma imagem na requisição
         if (foto == '') {
             throw new CustomError('O campo foto é obrigatório', 400);
         }
@@ -181,7 +190,8 @@ module.exports = class RestauranteController {
 
         const horariosDados = req.body.horarios;
 
-        const transacao = await db.transaction(); // Iniciar uma transação
+        // Iniciar uma transação
+        const transacao = await db.transaction();
 
         try {
 
@@ -195,6 +205,7 @@ module.exports = class RestauranteController {
 
                 const promocao = await Promocao.findOne({ where: { produtoId: produto.id }, transaction: transacao });
 
+                // Tratar se encontrou uma promoção, para excluir antiga e criar nova
                 if (promocao) {
                     await HorarioPromocao.destroy({ where: { promocaoId: promocao.id }, transaction: transacao });
                     await Promocao.destroy({ where: { id: promocao.id }, transaction: transacao });
@@ -232,11 +243,13 @@ module.exports = class RestauranteController {
 
         const restaurante = await Restaurante.findOne({ where: { id: id } });
 
+        // Tratar se não encontrou um restaurante
         if (!restaurante) {
             throw new CustomError('Restaurante não encontrado!', 404);
         }
 
-        const transacao = await db.transaction(); // Iniciar uma transação
+        // Iniciar uma transação
+        const transacao = await db.transaction();
 
         try {
 
@@ -247,6 +260,7 @@ module.exports = class RestauranteController {
 
                 const promocao = await Promocao.findOne({ where: { produtoId: produto.id } });
 
+                // Tratar se encontrou uma promoção, para excluir antiga e criar nova
                 if (promocao) {
                     await HorarioPromocao.destroy({ where: { promocaoId: promocao.id }, transaction: transacao });
                     await Promocao.destroy({ where: { produtoId: produto.id }, transaction: transacao });
@@ -271,7 +285,8 @@ module.exports = class RestauranteController {
     static async createProduct(req, res) {
 
         const erros = validationResult(req);
-
+        
+        // Verificar se existe erro na validação do elementos vindo do body
         if (!erros.isEmpty()) {
             return res.status(400).json({ errors: erros.array() });
         }
@@ -280,6 +295,7 @@ module.exports = class RestauranteController {
 
         const restaurante = await Restaurante.findOne({ where: { id: id } });
 
+        // Tratar se não encontrou um restaurante
         if (!restaurante) {
             throw new CustomError('Restaurante não encontrado!', 404);
         }
@@ -292,15 +308,18 @@ module.exports = class RestauranteController {
 
         let foto = '';
 
+        // Verificar se veio file (imagem) na requisição
         if (req.file) {
             foto = req.file.filename;
         }
 
+        // Tratar se não houve upload de uma imagem na requisição
         if (foto == '') {
             throw new CustomError('O campo foto é obrigatório', 400);
         }
 
-        const transacao = await db.transaction(); // Iniciar uma transação
+        // Iniciar uma transação
+        const transacao = await db.transaction();
 
         try {
             // Verifique se a categoria já existe
@@ -339,6 +358,7 @@ module.exports = class RestauranteController {
 
         const restaurante = await Restaurante.findOne({ where: { id: id } });
 
+        // Tratar se não encontrou um restaurante
         if (!restaurante) {
             throw new CustomError('Restaurante não encontrado!', 404);
         }
@@ -369,7 +389,8 @@ module.exports = class RestauranteController {
     static async editProduct(req, res) {
 
         const erros = validationResult(req);
-
+        
+        // Verificar se existe erro na validação do elementos vindo do body
         if (!erros.isEmpty()) {
             return res.status(400).json({ errors: erros.array() });
         }
@@ -378,16 +399,19 @@ module.exports = class RestauranteController {
 
         const restaurante = await Restaurante.findOne({ where: { id: id } });
 
+        // Tratar se não encontrou um restaurante
         if (!restaurante) {
             throw new CustomError('Restaurante não encontrado!', 404);
         }
 
         const produto = await Produto.findOne({ where: { id: idProduto } });
 
+        // Tratar se não encontrou um produto
         if (!produto) {
             throw new CustomError('Produto não encontrado!', 404);
         }
 
+        // Tratar se o produto encontrado pertence ap restaurante
         if (produto.restauranteId != id) {
             throw new CustomError('Este produto não pertence a esse restaurante!', 400);
         }
@@ -400,15 +424,18 @@ module.exports = class RestauranteController {
 
         let foto = '';
 
+        // Verificar se veio file (imagem) na requisição
         if (req.file) {
             foto = req.file.filename;
         }
 
+        // Tratar se não houve upload de uma imagem na requisição
         if (foto == '') {
             throw new CustomError('O campo foto é obrigatório', 400);
         }
 
-        const transacao = await db.transaction(); // Iniciar uma transação
+        // Iniciar uma transação
+        const transacao = await db.transaction();
 
         try {
 
@@ -448,21 +475,25 @@ module.exports = class RestauranteController {
 
         const restaurante = await Restaurante.findOne({ where: { id: id } });
 
+        // Tratar se não encontrou um restaurante
         if (!restaurante) {
             throw new CustomError('Restaurante não encontrado!', 404);
         }
 
         const produto = await Produto.findOne({ where: { id: idProduto } });
 
+        // Tratar se não encontrou um produto
         if (!produto) {
             throw new CustomError('Produto não encontrado!', 404);
         }
 
-        const transacao = await db.transaction(); // Iniciar uma transação
+        // Iniciar uma transação
+        const transacao = await db.transaction();
 
         try {
             const promocao = await Promocao.findOne({ where: { produtoId: idProduto } });
 
+            // Tratar se encontrou uma promoção
             if (promocao) {
                 await HorarioPromocao.destroy({ where: { promocaoId: promocao.id }, transaction: transacao });
                 await Promocao.destroy({ where: { produtoId: idProduto }, transaction: transacao });
@@ -486,7 +517,8 @@ module.exports = class RestauranteController {
     static async addPromotion(req, res) {
 
         const erros = validationResult(req);
-
+        
+        // Verificar se existe erro na validação do elementos vindo do body
         if (!erros.isEmpty()) {
             return res.status(400).json({ errors: erros.array() });
         }
@@ -495,22 +527,26 @@ module.exports = class RestauranteController {
 
         const restaurante = await Restaurante.findOne({ where: { id: id } });
 
+        // Tratar se não encontrou um restaurante
         if (!restaurante) {
             throw new CustomError('Restaurante não encontrado!', 404);
         }
 
         const produto = await Produto.findOne({ where: { id: idProduto } });
 
+        // Tratar se não encontrou um produto
         if (!produto) {
             throw new CustomError('Produto não encontrado!', 404);
         }
 
+        // Tratar se o produto encontrado pertence ap restaurante
         if (produto.restauranteId != id) {
             throw new CustomError('Este produto não pertence a esse restaurante!', 400);
         }
 
         const promocao = await Promocao.findOne({ where: { produtoId: idProduto } });
 
+        // Tratar se produto já possui promoção
         if (promocao) {
             throw new CustomError('Produto já possui uma promoção!', 400);
         }
@@ -521,7 +557,8 @@ module.exports = class RestauranteController {
             horarios
         } = req.body;
 
-        const transacao = await db.transaction(); // Iniciar uma transação
+        // Iniciar uma transação
+        const transacao = await db.transaction();
 
         try {
             const restauranteHorarios = await HorarioRestaurante.findAll({ where: { restauranteId: id } });
@@ -533,6 +570,7 @@ module.exports = class RestauranteController {
                         new Date('1970-01-01T' + h.fechamento) >= new Date('1970-01-01T' + horario.fimDaPromocao)
                 );
 
+                // Trata se o horario da promoção está dentro do horário do restaurante
                 if (!horarioRestaurante) {
                     await transacao.rollback();
                     res.status(400).json({ message: 'O horário da promoção não está dentro do horário de funcionamento do restaurante' });
@@ -577,27 +615,32 @@ module.exports = class RestauranteController {
 
         const restaurante = await Restaurante.findOne({ where: { id: id } });
 
+        // Tratar se não encontrou um restaurante
         if (!restaurante) {
             throw new CustomError('Restaurante não encontrado!', 404);
         }
 
         const produto = await Produto.findOne({ where: { id: idProduto } });
 
+        // Tratar se não encontrou um produto
         if (!produto) {
             throw new CustomError('Produto não encontrado!', 404);
         }
 
+        // Tratar se o produto encontrado pertence ap restaurante
         if (produto.restauranteId != id) {
             throw new CustomError('Este produto não pertence a esse restaurante!', 400);
         }
 
         const promocao = await Promocao.findOne({ where: { produtoId: idProduto } });
 
+        // Tratar se não encontrar uma promoção
         if (!promocao) {
             throw new CustomError('Este produto não possui promoção!', 404);
         }
 
-        const transacao = await db.transaction(); // Iniciar uma transação
+        // Iniciar uma transação
+        const transacao = await db.transaction();
 
         try {
 
