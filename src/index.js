@@ -3,9 +3,19 @@ require('dotenv').config();
 
 const app = express();
 
-app.get('/', (request, response) => {
-    response.status(200).send('Olá, Mundo!');
-});
+// Configurar resposta JSON
+app.use(express.json());
+
+// Pasta pública para imagens
+app.use(express.static('public'));
+
+// Rotas
+const RestauranteRoutes = require('./routes/RestauranteRoutes');
+app.use('/restaurantes', RestauranteRoutes);
+
+// Tratamento de erros
+const errorHandler = require('./helpers/handlerError');
+app.use(errorHandler);
 
 app.listen(process.env.PORT, () => { 
     console.log('Servidor executando!');
