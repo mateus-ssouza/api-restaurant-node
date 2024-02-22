@@ -36,46 +36,6 @@ exports.createRestaurantValidation = [
         .withMessage('O campo estado é obrigatório')
         .isLength({ min: 2, max: 2 })
         .withMessage('O estado deve ter exatamente 2 caracteres'),
-
-    body('horarios')
-        .notEmpty()
-        .withMessage('Os horários precisam ser enviados')
-        .isArray({ min: 1 })
-        .withMessage('A lista de horários não pode estar vazia')
-        .custom((value) => {
-            for (const horario of value) {
-                if (typeof horario !== 'object') {
-                    throw new Error('Cada horário deve ser um objeto');
-                }
-
-                if (!Object.prototype.hasOwnProperty.call(horario, 'diaDaSemana')) {
-                    throw new Error('Cada horário deve ter a chave diaDaSemana');
-                }
-
-                if (!Object.prototype.hasOwnProperty.call(horario, 'abertura')) {
-                    throw new Error('Cada horário deve ter a chave abertura');
-                }
-
-                if (!Object.prototype.hasOwnProperty.call(horario, 'fechamento')) {
-                    throw new Error('Cada horário deve ter a chave fechamento');
-                }
-
-                if (typeof horario.diaDaSemana !== 'string' || horario.diaDaSemana.length < 1 || horario.diaDaSemana.length > 20) {
-                    throw new Error('O campo diaDaSemana deve ter entre 1 e 20 caracteres');
-                }
-
-                const aberturaRegex = /^(0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$/;
-                if (!aberturaRegex.test(horario.abertura)) {
-                    throw new Error('O campo abertura deve estar no formato HH:mm');
-                }
-
-                const fechamentoRegex = /^(0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$/;
-                if (!fechamentoRegex.test(horario.fechamento)) {
-                    throw new Error('O campo fechamento deve estar no formato HH:mm');
-                }
-            }
-            return true;
-        })
 ];
 
 
@@ -113,44 +73,5 @@ exports.editRestaurantValidation = [
         .notEmpty()
         .withMessage('O campo estado é obrigatório')
         .isLength({ min: 2, max: 2 })
-        .withMessage('O estado deve ter exatamente 2 caracteres'),
-
-    body('horarios')
-        .notEmpty()
-        .withMessage('Os horários precisam ser enviados')
-        .isArray({ min: 1 }).withMessage('A lista de horários não pode estar vazia')
-        .custom((value) => {
-            for (const horario of value) {
-                if (typeof horario !== 'object') {
-                    throw new Error('Cada horário deve ser um objeto');
-                }
-
-                if (!Object.prototype.hasOwnProperty.call(horario, 'diaDaSemana')) {
-                    throw new Error('Cada horário deve ter a chave diaDaSemana');
-                }
-
-                if (!Object.prototype.hasOwnProperty.call(horario, 'abertura')) {
-                    throw new Error('Cada horário deve ter a chave abertura');
-                }
-
-                if (!Object.prototype.hasOwnProperty.call(horario, 'fechamento')) {
-                    throw new Error('Cada horário deve ter a chave fechamento');
-                }
-
-                if (typeof horario.diaDaSemana !== 'string' || horario.diaDaSemana.length < 1 || horario.diaDaSemana.length > 20) {
-                    throw new Error('O campo diaDaSemana deve ter entre 1 e 20 caracteres');
-                }
-
-                const aberturaRegex = /^(0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$/;
-                if (!aberturaRegex.test(horario.abertura)) {
-                    throw new Error('O campo abertura deve estar no formato HH:mm');
-                }
-
-                const fechamentoRegex = /^(0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$/;
-                if (!fechamentoRegex.test(horario.fechamento)) {
-                    throw new Error('O campo fechamento deve estar no formato HH:mm');
-                }
-            }
-            return true;
-        })
+        .withMessage('O estado deve ter exatamente 2 caracteres')
 ];
