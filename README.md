@@ -6,7 +6,7 @@ Esta API teve como objetivo praticar conceitos de node.js com um banco de dados 
 
 ## Executar
 
-Após baixar o repositório, abra o terminar na pasta onde foi baixado e execute os seguintes comandos:
+Após baixar o repositório, abra o terminal na pasta onde foi baixado e execute os seguintes comandos:
 
 Entrando na pasta do projeto
 
