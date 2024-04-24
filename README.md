@@ -23,7 +23,7 @@ Instalando as dependências do projeto
 Executando a aplicação
 
 ```bash
-  nmp start
+  npm start
 ```
     
 ## Variáveis de Ambiente
